@@ -10,7 +10,7 @@ function initTasksPage() {
     const taskForm = document.getElementById('taskForm');
     const taskSound = document.getElementById('taskSound');
 
-    addTaskBtn.addEventListener('click', showTaskForm);
+    addTaskBtn.addEventListener('click', () => showTaskForm());
     cancelTaskBtn.addEventListener('click', hideTaskForm);
     taskForm.addEventListener('submit', saveTask);
     taskSound.addEventListener('change', handleSoundUpload);
