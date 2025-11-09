@@ -1,4 +1,10 @@
 """Main Flask application."""
+import sys
+from pathlib import Path
+
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from backend.routes import api

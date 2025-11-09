@@ -1,8 +1,13 @@
 """Database operations for the time tracking application."""
+import sys
 import sqlite3
 from datetime import datetime
 from typing import List, Optional
 from pathlib import Path
+
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from backend.models import Task, Session, UserSetting
 
 

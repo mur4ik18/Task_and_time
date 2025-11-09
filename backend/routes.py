@@ -1,9 +1,14 @@
 """API routes for the time tracking application."""
+import sys
+from pathlib import Path
+
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from flask import Blueprint, request, jsonify, send_from_directory
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 import os
-from pathlib import Path
 from backend.database import Database
 from backend.models import Task, Session
 
