@@ -10,17 +10,26 @@ from flask_cors import CORS
 from backend.routes import api
 import os
 
-app = Flask(__name__, static_folder='../frontend', static_url_path='')
+app = Flask(__name__)
 CORS(app)
 
-# Register blueprints
+# Register blueprints FIRST (important for routing priority)
 app.register_blueprint(api, url_prefix='/api')
 
 # Serve static files
 @app.route('/')
 def index():
     """Serve the main page."""
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory('../frontend', 'index.html')
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files."""
+    # Check if it's a static file request
+    if filename.startswith('css/') or filename.startswith('js/'):
+        return send_from_directory('../frontend', filename)
+    # Otherwise serve index.html (for SPA routing)
+    return send_from_directory('../frontend', 'index.html')
 
 @app.route('/sounds/<path:filename>')
 def serve_sound(filename):
@@ -33,6 +42,6 @@ if __name__ == '__main__':
     os.makedirs('static/sounds', exist_ok=True)
     
     print("Starting Time Tracker application...")
-    print("Open your browser and navigate to: http://localhost:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print("Open your browser and navigate to: http://localhost:5010")
+    app.run(debug=True, host='0.0.0.0', port=5010)
 
