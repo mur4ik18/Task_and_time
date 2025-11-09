@@ -10,31 +10,35 @@ from flask_cors import CORS
 from backend.routes import api
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 CORS(app)
 
-# Register blueprints FIRST (important for routing priority)
+# Register API blueprints FIRST (important for routing priority)
 app.register_blueprint(api, url_prefix='/api')
 
-# Serve static files
-@app.route('/')
-def index():
-    """Serve the main page."""
-    return send_from_directory('../frontend', 'index.html')
-
-@app.route('/<path:filename>')
-def serve_static(filename):
-    """Serve static files."""
-    # Check if it's a static file request
-    if filename.startswith('css/') or filename.startswith('js/'):
-        return send_from_directory('../frontend', filename)
-    # Otherwise serve index.html (for SPA routing)
-    return send_from_directory('../frontend', 'index.html')
-
+# Serve sound files
 @app.route('/sounds/<path:filename>')
 def serve_sound(filename):
     """Serve sound files."""
     return send_from_directory('../static/sounds', filename)
+
+# Serve CSS files
+@app.route('/css/<path:filename>')
+def serve_css(filename):
+    """Serve CSS files."""
+    return send_from_directory('../frontend/css', filename)
+
+# Serve JS files
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    """Serve JS files."""
+    return send_from_directory('../frontend/js', filename)
+
+# Serve index.html for root only
+@app.route('/')
+def serve_index():
+    """Serve the main page."""
+    return send_from_directory('../frontend', 'index.html')
 
 if __name__ == '__main__':
     # Ensure directories exist
