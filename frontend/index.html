@@ -1,14 +1,157 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Task Time Tracker</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task & Time Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>⏱️ Task & Time Tracker</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="exportBtn">Export Data</button>
+                <button class="btn btn-secondary" id="importBtn">Import Data</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="timer">Timer</button>
+            <button class="nav-tab" data-tab="tasks">Tasks</button>
+            <button class="nav-tab" data-tab="reports">Reports</button>
+        </nav>
+
+        <!-- Timer Tab -->
+        <div class="tab-content active" id="timer-tab">
+            <div class="timer-section">
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                
+                <div class="task-selector">
+                    <label for="currentTask">Current Task:</label>
+                    <select id="currentTask" class="task-select">
+                        <option value="">Select a task...</option>
+                    </select>
+                </div>
+
+                <div class="timer-controls">
+                    <button class="btn btn-primary btn-large" id="startBtn">Start</button>
+                    <button class="btn btn-danger btn-large" id="stopBtn" disabled>Stop</button>
+                    <button class="btn btn-secondary" id="breakBtn">Start Break</button>
+                </div>
+
+                <div class="timer-info" id="timerInfo">
+                    <p id="limitWarning" class="warning-text" style="display: none;">⚠️ Time limit reached!</p>
+                    <p id="taskInfo"></p>
+                </div>
+            </div>
+
+            <!-- Session History -->
+            <div class="session-history">
+                <h2>Recent Sessions</h2>
+                <div id="sessionList" class="session-list"></div>
+            </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div class="tab-content" id="tasks-tab">
+            <div class="tasks-header">
+                <h2>Manage Tasks</h2>
+                <button class="btn btn-primary" id="addTaskBtn">+ Add Task</button>
+            </div>
+
+            <!-- Add/Edit Task Form -->
+            <div class="task-form-container" id="taskFormContainer" style="display: none;">
+                <div class="card">
+                    <h3 id="formTitle">Add New Task</h3>
+                    <form id="taskForm">
+                        <div class="form-group">
+                            <label for="taskName">Task Name *</label>
+                            <input type="text" id="taskName" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskDescription">Description</label>
+                            <textarea id="taskDescription" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskTimeLimit">Time Limit (minutes)</label>
+                            <input type="number" id="taskTimeLimit" min="1" placeholder="Optional">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskSound">Notification Sound</label>
+                            <input type="file" id="taskSound" accept=".mp3,.wav,.ogg">
+                            <small id="currentSound"></small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Task</button>
+                            <button type="button" class="btn btn-secondary" id="cancelTaskBtn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tasks List -->
+            <div class="tasks-list" id="tasksList"></div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div class="tab-content" id="reports-tab">
+            <div class="reports-header">
+                <h2>Reports</h2>
+                <div class="report-controls">
+                    <button class="btn btn-secondary report-type-btn active" data-type="daily">Daily</button>
+                    <button class="btn btn-secondary report-type-btn" data-type="weekly">Weekly</button>
+                    <button class="btn btn-secondary report-type-btn" data-type="monthly">Monthly</button>
+                </div>
+            </div>
+
+            <div class="report-date-selector">
+                <button class="btn btn-icon" id="prevPeriod">◀</button>
+                <input type="date" id="reportDate" class="date-input">
+                <input type="week" id="reportWeek" class="date-input" style="display: none;">
+                <input type="month" id="reportMonth" class="date-input" style="display: none;">
+                <button class="btn btn-icon" id="nextPeriod">▶</button>
+            </div>
+
+            <div class="report-content">
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTime">0:00</div>
+                        <div class="stat-label">Total Time</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalSessions">0</div>
+                        <div class="stat-label">Sessions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="breakTime">0:00</div>
+                        <div class="stat-label">Break Time</div>
+                    </div>
+                </div>
+
+                <div class="task-breakdown" id="taskBreakdown">
+                    <h3>Task Breakdown</h3>
+                    <div id="taskStats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio element for notifications -->
+    <audio id="notificationSound" style="display: none;"></audio>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/reports.js"></script>
+</body>
 </html>
 
