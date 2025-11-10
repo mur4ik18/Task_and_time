@@ -7,15 +7,17 @@
     
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/bash</string>
-        <string>/Users/alex/Task_and_time/start_app.sh</string>
+        <string>/opt/homebrew/bin/pixi</string>
+        <string>run</string>
+        <string>python</string>
+        <string>start_app_daemon.py</string>
     </array>
     
     <key>RunAtLoad</key>
     <true/>
     
     <key>KeepAlive</key>
-    <false/>
+    <true/>
     
     <key>StandardOutPath</key>
     <string>/tmp/task_and_time_stdout.log</string>
