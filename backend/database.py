@@ -222,13 +222,60 @@ class Database:
             )
         return None
     
+    def get_last_completed_session(self) -> Optional[Session]:
+        """Get the last completed session."""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM sessions 
+            WHERE end_time IS NOT NULL 
+            ORDER BY end_time DESC 
+            LIMIT 1
+        ''')
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            return Session(
+                id=row['id'],
+                task_id=row['task_id'],
+                start_time=datetime.fromisoformat(row['start_time']),
+                end_time=datetime.fromisoformat(row['end_time']),
+                duration=row['duration'],
+                is_break=bool(row['is_break'])
+            )
+        return None
+    
+    def get_all_sessions(self) -> List[Session]:
+        """Get all sessions ordered by start time."""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM sessions 
+            ORDER BY start_time DESC
+        ''')
+        rows = cursor.fetchall()
+        conn.close()
+        
+        sessions = []
+        for row in rows:
+            sessions.append(Session(
+                id=row['id'],
+                task_id=row['task_id'],
+                start_time=datetime.fromisoformat(row['start_time']),
+                end_time=datetime.fromisoformat(row['end_time']) if row['end_time'] else None,
+                duration=row['duration'],
+                is_break=bool(row['is_break'])
+            ))
+        return sessions
+    
     def get_sessions_by_date_range(self, start_date: datetime, end_date: datetime) -> List[Session]:
         """Get sessions within a date range."""
         conn = self._get_connection()
         cursor = conn.cursor()
         cursor.execute('''
             SELECT * FROM sessions 
-            WHERE start_time >= ? AND start_time <= ?
+            WHERE datetime(start_time) >= datetime(?) AND datetime(start_time) < datetime(?)
             ORDER BY start_time DESC
         ''', (start_date.isoformat(), end_date.isoformat()))
         rows = cursor.fetchall()

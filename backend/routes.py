@@ -155,6 +155,28 @@ def get_task_sessions(task_id):
     return jsonify([session.to_dict() for session in sessions])
 
 
+@api.route('/sessions/all', methods=['GET'])
+def get_all_sessions():
+    """Get all sessions with gap information."""
+    sessions = db.get_all_sessions()
+    
+    result = []
+    for i, session in enumerate(sessions):
+        session_dict = session.to_dict()
+        
+        # Calculate gap from previous session
+        if i < len(sessions) - 1 and session.start_time and sessions[i + 1].end_time:
+            previous_session = sessions[i + 1]
+            gap_seconds = int((session.start_time - previous_session.end_time).total_seconds())
+            session_dict['gap_before'] = gap_seconds if gap_seconds > 0 else 0
+        else:
+            session_dict['gap_before'] = None
+        
+        result.append(session_dict)
+    
+    return jsonify(result)
+
+
 # Reports endpoints
 @api.route('/reports/daily/<date>', methods=['GET'])
 def get_daily_report(date):

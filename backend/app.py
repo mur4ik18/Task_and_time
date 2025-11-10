@@ -16,7 +16,13 @@ CORS(app)
 # Register API blueprints FIRST (important for routing priority)
 app.register_blueprint(api, url_prefix='/api')
 
-# Serve sound files
+# Serve sound files from static/sounds
+@app.route('/static/sounds/<path:filename>')
+def serve_static_sound(filename):
+    """Serve sound files from static directory."""
+    return send_from_directory('../static/sounds', filename)
+
+# Serve sound files (legacy route)
 @app.route('/sounds/<path:filename>')
 def serve_sound(filename):
     """Serve sound files."""

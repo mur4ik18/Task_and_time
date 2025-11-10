@@ -124,18 +124,14 @@ async function loadRecentSessions() {
         const tasks = await apiRequest('/tasks');
         const sessionList = document.getElementById('sessionList');
         
-        // Get sessions from all tasks
-        const allSessions = [];
-        for (const task of tasks) {
-            const sessions = await apiRequest(`/sessions/task/${task.id}`);
-            sessions.forEach(session => {
-                session.taskName = task.name;
-                allSessions.push(session);
-            });
-        }
-
-        // Sort by start time
-        allSessions.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+        // Get all sessions with gap information
+        const allSessions = await apiRequest('/sessions/all');
+        
+        // Add task names to sessions
+        allSessions.forEach(session => {
+            const task = tasks.find(t => t.id === session.task_id);
+            session.taskName = task ? task.name : 'Unknown';
+        });
 
         // Display last 10 sessions
         const recentSessions = allSessions.slice(0, 10);
@@ -155,7 +151,27 @@ async function loadRecentSessions() {
             const startTime = new Date(session.start_time);
             const timeStr = startTime.toLocaleString();
 
+            // Format gap time
+            let gapHtml = '';
+            if (session.gap_before !== null && session.gap_before > 0) {
+                const gapHours = Math.floor(session.gap_before / 3600);
+                const gapMinutes = Math.floor((session.gap_before % 3600) / 60);
+                const gapSeconds = session.gap_before % 60;
+                
+                let gapText = '';
+                if (gapHours > 0) {
+                    gapText = `${gapHours}h ${gapMinutes}m`;
+                } else if (gapMinutes > 0) {
+                    gapText = `${gapMinutes}m ${gapSeconds}s`;
+                } else {
+                    gapText = `${gapSeconds}s`;
+                }
+                
+                gapHtml = `<div class="session-gap">⏸️ Gap: ${gapText}</div>`;
+            }
+
             return `
+                ${gapHtml}
                 <div class="session-item ${session.is_break ? 'break' : ''}">
                     <div class="session-info">
                         <div class="session-task">${session.is_break ? '☕ Break' : session.taskName}</div>
@@ -189,6 +205,48 @@ function formatDuration(seconds) {
     return `${minutes}m`;
 }
 
+// Ticking clock functionality
+function initTickingClock() {
+    const tickingClock = document.getElementById('tickingClock');
+    const volumeSlider = document.getElementById('clockVolumeSlider');
+    const volumeValue = document.getElementById('volumeValue');
+    
+    // Set initial volume
+    tickingClock.volume = volumeSlider.value / 100;
+    
+    // Auto-play the ticking sound (with user interaction)
+    const startTicking = () => {
+        tickingClock.play().catch(err => {
+            console.log('Autoplay prevented. Will start on user interaction.');
+        });
+        // Remove the listener after first interaction
+        document.removeEventListener('click', startTicking);
+    };
+    
+    // Try to start immediately, or wait for user interaction
+    tickingClock.play().catch(() => {
+        document.addEventListener('click', startTicking, { once: true });
+    });
+    
+    // Volume control
+    volumeSlider.addEventListener('input', (e) => {
+        const volume = e.target.value;
+        tickingClock.volume = volume / 100;
+        volumeValue.textContent = `${volume}%`;
+        
+        // Save volume preference to localStorage
+        localStorage.setItem('clockVolume', volume);
+    });
+    
+    // Load saved volume preference
+    const savedVolume = localStorage.getItem('clockVolume');
+    if (savedVolume !== null) {
+        volumeSlider.value = savedVolume;
+        tickingClock.volume = savedVolume / 100;
+        volumeValue.textContent = `${savedVolume}%`;
+    }
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
@@ -196,6 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTimer();
     initTasksPage();
     initReports();
+    initTickingClock();
     
     // Load initial data
     loadTasks();

@@ -12,6 +12,11 @@
         <header class="header">
             <h1>⏱️ Task & Time Tracker</h1>
             <div class="header-actions">
+                <div class="volume-control">
+                    <label for="clockVolumeSlider">🔊</label>
+                    <input type="range" id="clockVolumeSlider" min="0" max="100" value="50" class="volume-slider">
+                    <span id="volumeValue">50%</span>
+                </div>
                 <button class="btn btn-secondary" id="exportBtn">Export Data</button>
                 <button class="btn btn-secondary" id="importBtn">Import Data</button>
                 <input type="file" id="importFile" accept=".json" style="display: none;">
@@ -146,6 +151,11 @@
 
     <!-- Audio element for notifications -->
     <audio id="notificationSound" style="display: none;"></audio>
+    
+    <!-- Audio element for ticking clock -->
+    <audio id="tickingClock" loop style="display: none;">
+        <source src="/static/sounds/clock-tick.wav" type="audio/wav">
+    </audio>
 
     <!-- Scripts -->
     <script src="js/app.js"></script>
